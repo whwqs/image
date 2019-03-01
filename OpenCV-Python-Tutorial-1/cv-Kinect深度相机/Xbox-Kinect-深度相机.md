@@ -1,0 +1,1 @@
+- 移动到[Kinect Tutorial in Python3 教程2018](https://github.com/makelove/Kinect_Tutorial)
