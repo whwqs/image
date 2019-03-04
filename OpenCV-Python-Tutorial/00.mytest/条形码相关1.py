@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-path = "1.jpg"
+path = "2.png"
 
-img = cv2.imread('1.jpg',0)
+img = cv2.imread(path,0)
 edges = cv2.Canny(img, 100, 200)
 
 print(edges)
