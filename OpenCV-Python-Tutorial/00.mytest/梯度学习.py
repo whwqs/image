@@ -22,6 +22,8 @@ cv2.waitKey()
 
 #matplotlib 是rgb
 img2 = cv2.cvtColor(img1,cv2.COLOR_BGR2RGB)
+print(img1[0,0])
+print(img2[0,0])
 plt.imshow(img2)
 plt.show()
 
