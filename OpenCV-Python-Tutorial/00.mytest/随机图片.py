@@ -2,6 +2,13 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 from pyzbar import pyzbar
+import TextEncoder 
+from hubarcode.datamatrix import DataMatrixEncoder
+
+
+encoder = DataMatrixEncoder("hello")
+encoder.save("test.png")
+print (encoder.get_ascii())
 
 img1 = np.full((100,100,4),127,np.uint8)
 
@@ -16,7 +23,7 @@ plt.show()
 
 img2 = np.full((300,300,1),127,np.uint8)
 
-img2 = cv2.imread("1.jpg",0)
+img2 = cv2.imread("cli-DATAMATRIX_321kk.png",0)
 
 print(img2)
 img3 = cv2.cvtColor(img2,cv2.COLOR_BGR2RGB)
