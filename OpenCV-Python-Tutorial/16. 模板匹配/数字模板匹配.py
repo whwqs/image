@@ -63,8 +63,11 @@ cv2.waitKey(0)
 
 
 # 3.有关几个函数的说明：
+x0=np.arange(9.)
+print(x0)
 x = np.arange(9.).reshape(3, 3)
-print(np.where(x > 5))
+print(x)
+print(np.where(x >= 5))
 # 结果：(array([2, 2, 2]), array([0, 1, 2]))
 
 x = [1, 2, 3]

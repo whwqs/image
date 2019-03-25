@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 #原图
-img = cv2.imread("img.bmp",0)
+img = cv2.imread("img.bmp")
 img0 = img[775:800,838:888]
 img1 = img[859:874,234:285]
 img2 = img[768:795,531:581]
@@ -16,18 +16,27 @@ img8 = img[10:75,442:480]
 img9 = img[10:75,495:525]
 pts = []
 img_ = img.copy()
+h,w = img.shape[:2]
+print(round(w/2),round(h/2))
 for template in [img0,img1,img2,img7]:        
     h, w = template.shape[:2]
     res = cv2.matchTemplate(img_, template, cv2.TM_CCOEFF_NORMED)
-    print("====")
-    print(res)
-    print("******")
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    print(min_loc)
+    #print("====")
+    #print(res)
+    #print("******")
     threshold = 0.8
     loc = np.where(res >= threshold)
+    #print(res)
+    #print(loc)
     for pt in zip(*loc[::-1]):  # *号表示可选参数
         bottom_right = (pt[0] + w, pt[1] + h)
-        cv2.rectangle(img_, pt, bottom_right, (0, 0, 255), 2)
+        cv2.rectangle(img_, pt, bottom_right, (0,0,255), 1)
         pts.append(pt)
-print(len(pts))
-cv2.imshow('img_',img_)
+print((pts))
+cv2.namedWindow("img_1",0);
+cv2.resizeWindow("img_1",960, 540);
+cv2.imshow('img_1',img_)
 cv2.waitKey(0)
+cv2.destroyAllWindows()
