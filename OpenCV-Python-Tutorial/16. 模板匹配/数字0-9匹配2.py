@@ -17,12 +17,15 @@ img9 = img[10:75,495:525]
 pts = []
 img_ = img.copy()
 h,w = img.shape[:2]
-print(round(w/2),round(h/2))
+#print(round(w/2),round(h/2))
 for template in [img0,img1,img2,img7]:        
     h, w = template.shape[:2]
     res = cv2.matchTemplate(img_, template, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-    print(min_loc)
+    print(min_val, max_val, min_loc, max_loc)
+    
+    cv2.rectangle(img_, min_loc, (min_loc[0]+w,min_loc[1]+h), (255,0,0), 1)
+
     #print("====")
     #print(res)
     #print("******")
@@ -30,10 +33,20 @@ for template in [img0,img1,img2,img7]:
     loc = np.where(res >= threshold)
     #print(res)
     #print(loc)
+    add = 0
+    print(loc[::-1])
     for pt in zip(*loc[::-1]):  # *号表示可选参数
         bottom_right = (pt[0] + w, pt[1] + h)
         cv2.rectangle(img_, pt, bottom_right, (0,0,255), 1)
-        pts.append(pt)
+        closed = False
+        for pt2 in pts:
+                if abs(pt[0]-pt2[0])+abs(pt[1]-pt2[1]) < 20:
+                        closed = True
+        if not closed:
+                pts.append(pt)
+        if add==0:
+                
+                add+=1
 print((pts))
 cv2.namedWindow("img_1",0);
 cv2.resizeWindow("img_1",960, 540);
