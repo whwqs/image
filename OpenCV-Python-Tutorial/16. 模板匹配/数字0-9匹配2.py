@@ -21,10 +21,15 @@ h,w = img.shape[:2]
 for template in [img0,img1,img2,img7]:        
     h, w = template.shape[:2]
     res = cv2.matchTemplate(img_, template, cv2.TM_CCOEFF_NORMED)
+
+    print("img"+str(img.shape))
+    print("res"+str(res.shape))
+    print("t"+str(template.shape))
+
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
     print(min_val, max_val, min_loc, max_loc)
     
-    cv2.rectangle(img_, min_loc, (min_loc[0]+w,min_loc[1]+h), (255,0,0), 1)
+    cv2.rectangle(img_, max_loc, (max_loc[0]+w,max_loc[1]+h), (255,0,0), 1)
 
     #print("====")
     #print(res)

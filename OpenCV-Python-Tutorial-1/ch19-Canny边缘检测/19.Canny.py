@@ -29,9 +29,10 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-img = cv2.imread('../data/messi5.jpg',0)
+img = cv2.imread('data/messi5.jpg',0)
+img = cv2.imread('20710.png',0)
+#img = img[747:948,212:319]
 edges = cv2.Canny(img, 100, 200)
-
 cv2.imshow('Edges',edges)
 cv2.waitKey(0)
 

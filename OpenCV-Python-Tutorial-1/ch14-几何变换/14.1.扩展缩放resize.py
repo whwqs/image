@@ -13,7 +13,7 @@ Resize(src, dst, interpolation=CV_INTER_LINEAR)
 import cv2
 import numpy as np
 
-img = cv2.imread('../data/messi5.jpg')
+img = cv2.imread('data/messi5.jpg')
 # 下面的 None 本应 是 出图像的尺寸 但是因为后边我们设置了缩放因子
 # 因此这里为 None
 res = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
