@@ -1,0 +1,2 @@
+python saveasgray.py
+pause

@@ -10,11 +10,13 @@ class tool(object):
         return json.dumps(obj,ensure_ascii=False, default=lambda o: o.__dict__, sort_keys=True, indent=2)   
 
     @staticmethod
-    def fromJson(strJson:str):
+    def fromJson(strJson:str):   
+        if strJson.startswith(u'\ufeff'): 
+                strJson = strJson.encode('utf8')[3:].decode('utf8')
         return json.loads(strJson)
 
 class config(object):
-    """description of class"""
+    """json文件转对象"""
     def __init__(self, jsonFilePath):
         try:            
             f = open(jsonFilePath, mode="r", encoding="utf8")             
@@ -22,12 +24,15 @@ class config(object):
             if bool(f):
                 f.close()
             return
-        lst = f.readlines()        
-        json = ""
-        for s in lst:
-            json += s
-        self.obj = tool.fromJson(json)        
+        lst = f.readlines() 
         f.close()
+        json = ""
+        for s in lst:             
+            json += s
+        self.obj = tool.fromJson(json)   
 
     def get(self,name):
         return self.obj[name]
+
+    def getobj(self):
+        return self.obj

@@ -4,7 +4,7 @@
 "json":"d:/spmonitor/1.txt",
 "lock":"d:/spmonitor/loc.txt",
 "imgTimer":0.5,
-"t":"img.bmp",
+"t":"d:/spmonitor2/img.bmp",
 "threshold":{"template1":0.8},
 "template1":[
 		"t[775:800,838:888]","t[859:874,234:285]","t[768:795,531:581]","","",

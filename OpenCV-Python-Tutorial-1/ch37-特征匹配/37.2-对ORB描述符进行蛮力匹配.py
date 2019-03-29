@@ -19,8 +19,11 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-img1 = cv2.imread('../data/box.png', 0)  # queryImage
-img2 = cv2.imread('../data/box_in_scene.png', 0)  # trainImage
+img1 = cv2.imread('data/box.png', 0)  # queryImage
+img2 = cv2.imread('data/box_in_scene.png', 0)  # trainImage
+
+img1 = cv2.imread('data/real01.png', 0)  # queryImage
+img2 = cv2.imread('data/real01.bmp', 0)  # trainImage
 
 # Initiate ORB detector
 orb = cv2.ORB_create()
