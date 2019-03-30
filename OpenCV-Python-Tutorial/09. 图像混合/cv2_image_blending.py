@@ -3,6 +3,7 @@
 
 import cv2
 import numpy as np
+import sys
 
 # 1.图片相加
 x = np.uint8([250])
@@ -10,6 +11,21 @@ y = np.uint8([10])
 
 print(cv2.add(x, y))  # 250+10 = 260 => 255
 print(x + y)  # 250+10 = 260 % 256 = 4
+
+#=================================================
+# mytest
+y = cv2.imread('lena_small.jpg',0)
+h,w = y.shape[:2]
+x = np.full((h*2,w*2),0,np.uint8)
+
+y = cv2.imread('lena_small.jpg',0)
+h,w = y.shape[:2]
+x[:h,:w] = y
+
+cv2.imshow("test",x)
+cv2.waitKey()
+sys.exit()
+#==============================================
 
 
 # 2.图像混合
