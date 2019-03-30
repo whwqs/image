@@ -120,16 +120,27 @@ def show(img):
     cv2.imshow("test"+str(time.time()),img)
     cv2.waitKey(0)
 
-def get_number_region(img):
-    show(img)
+def get_number_region(img):    
 
     img = cv2.blur(img, (3, 3))
     
-    (_, thresh) = cv2.threshold(img, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)   
-    
-    show(img)
+    (_, thresh) = cv2.threshold(img, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)  
 
-    show(thresh)
+    h,w = thresh.shape[:2]
+
+    xfound = 0
+
+    for x in range(h):
+        if xfound %2==0:
+            y0 = 0
+        for y in range(y0,w):
+
+
+
+
+
+
+    
     
     # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))  # 形态学处理:定义矩形结构
     #closed = cv2.erode(thresh, None, iterations=1)  # 闭运算：迭代5次
