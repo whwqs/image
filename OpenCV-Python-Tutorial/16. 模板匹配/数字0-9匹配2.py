@@ -15,7 +15,13 @@ img7 = img[899:927,836:883]
 img8 = img[10:75,442:480]
 img9 = img[10:75,495:525]
 pts = []
+"""
 img_ = img.copy()
+img_ = cv2.resize(img_,None,fx=2,fy=2,interpolation=cv2.INTER_CUBIC)
+cv2.imwrite("img2.bmp",img_)
+"""
+img_ = cv2.imread("img2.bmp")
+img_ = cv2.resize(img_,None,fx=0.5,fy=0.5,interpolation=cv2.INTER_CUBIC)
 h,w = img.shape[:2]
 #print(round(w/2),round(h/2))
 for template in [img0,img1,img2,img7]:        
