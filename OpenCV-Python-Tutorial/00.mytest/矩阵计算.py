@@ -35,4 +35,76 @@ A = [
 ]
 b = [300.45,210.45,230]
 
-c = 
+print(A[2].count(-9))
+
+print(A[2].index(12))
+
+
+C = [[255,255,255],[255,0,255],[0,255,0],[255,0,255],[255,255,255]]
+C = np.array(C)
+
+print("255的数量:"+str(np.sum(C==255)))
+
+rows,cols = C.shape[:2]
+
+C=C.tolist()
+
+
+
+ret = []
+r1,c1,r2,c2 = -1,-1,-1,-1
+print("====",rows,cols)
+for r in range(rows):
+    if r1==-1:
+        try:
+            C[r].index(0)
+            r1=r
+        except ValueError:
+            continue
+    elif r2==-1:
+        n=C[r].count(255)
+        
+        if n==cols:            
+            r2=r-1   
+print(r1,r2)
+
+
+r1,c1,r2,c2 = -1,-1,-1,-1
+
+for r in range(rows):
+    try:        
+        C[r].index(0)
+        r1=r
+        break
+    except ValueError:
+        continue   
+        
+
+for r in range(rows-1,r1,-1):
+    try:        
+        C[r].index(0)
+        r2=r
+        break
+    except ValueError:
+        continue   
+print(r1,r2)
+
+C = np.transpose(C).tolist()
+
+for c in range(cols):
+    try:        
+        C[c].index(0)
+        c1=c
+        break
+    except ValueError:
+        continue   
+        
+
+for c in range(cols-1,c1,-1):
+    try:        
+        C[c].index(0)
+        c2=c
+        break
+    except ValueError:
+        continue   
+print("col:",c1,c2)

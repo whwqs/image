@@ -23,7 +23,7 @@ def getBarcode(imgpath,name):
         return barcodeData,barcodeType
     return [""]
 
-def getCode(imgpath,name):      
+def getCode1(imgpath,name):      
     setting = cfg.get("t_"+name)
     codeset = setting["code"] 
     t = cv2.imread(codeset["tfile"],0)    
@@ -79,40 +79,35 @@ def getCode2(imgpath,name):
     threshold = codeset["threshold"]
     image = cv2.imread(imgpath,0)
     part = image[y:y+h,x:x+w]    
-    part_reginos = get_number_region(part)    
-    code = ""
-    templateDic = {}
+    part =  get0_255img(part)
+    parts = split(part)    
+    parts = [getjustimg(x) for x in parts]
     
-    for region in part_reginos:    
-        maxv = -100
+    code = ""
+    templateDic = {}    
+    for region in parts:  
         number = ""
+        ntemp = 0
         for i in range(10):
             key = "t"+str(i)
             if not( key in templateDic):
                 try:            
-                    t_ = eval("t["+tloc[i]+"]")             
-                    #t_ = cv2.resize(t_, None, fx=fx[i], fy=fy[i], interpolation=cv2.INTER_CUBIC)  
-                    (_, t_) = cv2.threshold(t_, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)
-                    #t_ = cv2.erode(t_, None, iterations=1)  # 闭运算：迭代5次
-                    #t_ = get_number_region(t_)[0]
-                    #show(t_)
+                    t_ = eval("t["+tloc[i]+"]")    
+                    t_ = get0_255img(t_)     
+                    t_ = getjustimg(t_)  
                     templateDic[key] = t_
                 except:
                     return "模板出错，请检查配置文件:"+ str(i) 
-            t_ = templateDic[key]           
-                
-            h1,w1 = t_.shape[:2]
-            h2,w2 = region.shape[:2]
-            h3 = max([h1,h2])
-            w3 = max([w1,w2])
-            region2 = np.full((h3,w3),255,np.uint8)
-            region2[:h2,:w2] = region            
-           
-            res = cv2.matchTemplate(region2, t_ , cv2.TM_CCOEFF_NORMED)
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-            if max_val>maxv:
-                number = str(i)
-                maxv = max_val
+            t_ = templateDic[key]  
+            rows,cols = t_.shape[:2]
+            region2 = region.copy()
+            region2 = cv2.resize(region2, (cols, rows), interpolation=cv2.INTER_CUBIC)
+            dimg = region2-t_
+            n0 = np.sum(dimg==0)
+            if n0>ntemp:
+                ntemp = n0
+                number = str(i)               
+            
         code += number
     return code
 
@@ -120,92 +115,73 @@ def show(img):
     cv2.imshow("test"+str(time.time()),img)
     cv2.waitKey(0)
 
-def get_number_region(img):    
+def get0_255img(old):
+    img = cv2.blur(old,(5,5))
+    return cv2.threshold(img, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
 
-    img = cv2.blur(img, (3, 3))
+def getjustimg(old):
+    rows,cols = old.shape[:2]
+    (r1,c1,r2,c2)=(-1,-1,-1,-1)
+    arr = old.tolist()
+    for r in range(rows):
+        try:        
+            arr[r].index(0)
+            r1=r
+            break
+        except ValueError:
+            continue           
+
+    for r in range(rows-1,r1,-1):
+        try:        
+            arr[r].index(0)
+            r2=r
+            break
+        except ValueError:
+            continue   
     
-    (_, thresh) = cv2.threshold(img, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)  
+    arr = np.transpose(old).tolist()
+    for r in range(cols):
+        try:        
+            arr[r].index(0)
+            c1=r
+            break
+        except ValueError:
+            continue           
 
-    h,w = thresh.shape[:2]
+    for r in range(cols-1,r1,-1):
+        try:        
+            arr[r].index(0)
+            c2=r
+            break
+        except ValueError:
+            continue 
+    return old[r1:r2,c1:c2]
 
-    xfound = 0
-
-    for x in range(h):
-        if xfound %2==0:
-            y0 = 0
-        for y in range(y0,w):
-
-
-
-
-
-
-    
-    
-    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))  # 形态学处理:定义矩形结构
-    #closed = cv2.erode(thresh, None, iterations=1)  # 闭运算：迭代5次
-
-    closed = thresh
-    height, width = closed.shape[:2]
-    z = [0] * height
-    # 垂直投影：统计并存储每一列的黑点数
-    lst_x = list()
-    for x in range(0, width):
-        for y in range(0, height):
-            if closed[y, x] == 0:
-                lst_x.append(x)
-            else:
-                continue
-
-    # 水平投影  #统计每一行的黑点数
-    a = 0
-    emptyImage1 = np.zeros((height, width), np.uint8)
-    for y in range(0, height):
-        for x in range(0, width):
-            if closed[y, x] == 0:
-                a = a + 1
-            else:
-                continue
-        z[y] = a
-        a = 0
-
-    # 绘制水平投影图
-    for y in range(0, height):
-        for x in range(0, z[y]):
-            b = 255
-            emptyImage1[y, x] = b
-
-    # 获取y轴坐标
-    lst_y = list()
-    start = 0
-    for y in range(0, height):
-        if emptyImage1[y, 0] == 255:
-            if not start:
-                start = y
-        else:
-            if emptyImage1[y, 0] == 0:
-                if start:
-                    lst_y.append((start, y))
-                    start = 0
-            continue
-
-    #print(lst_x[0], lst_x[-1])
-    #print(lst_y)
-    region = []
-    for i in lst_y:
-        corp_img = img[i[0]:i[1], 0:width]
-       
-        region.append(corp_img)
-        #cv2.imwrite("{}.jpg".format(lst_y.index(i)), corp_img)
-    
-    return region
+def split(img):
+    rows,cols = img.shape[:2]
+    arr = img.tolist()
+    ret = []
+    lasttr = 0
+    lasttr2 = 0
+    for r in range(1,rows,1):
+        try:
+            arr[lasttr2].index(0)
+            has0 = True
+        except ValueError:
+            has0 = False
+        has255 = arr[r].count(255)==cols
+        if has0 and has255:
+            ret.append(img[lasttr:r])
+            lasttr = r
+        lasttr2 +=1
+    return ret
 
 if __name__== '__main__':
     functype = sys.argv[1]#"code"#
     imgpath = sys.argv[2]#"20190329_150621.bmp"#
-    name = sys.argv[3]#"黄鹤楼"#    
+    name = sys.argv[3]# "黄鹤楼"#   
     if functype == "barcode":
         print(getBarcode(imgpath,name)[0])
     else:     
         code = getCode2(imgpath,name)
-        print(code+" "+str(len(code)))
+        print(code)
