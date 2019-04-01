@@ -88,6 +88,8 @@ def getCode2(imgpath,name):
     for region in parts:  
         number = ""
         ntemp = 0
+        region2 = region.copy()
+        region2 = cv2.resize(region2, (70, 70), interpolation=cv2.INTER_CUBIC)
         for i in range(10):
             key = "t"+str(i)
             if not( key in templateDic):
@@ -100,13 +102,17 @@ def getCode2(imgpath,name):
                     return "模板出错，请检查配置文件:"+ str(i) 
             t_ = templateDic[key]  
             rows,cols = t_.shape[:2]
-            region2 = region.copy()
-            region2 = cv2.resize(region2, (cols, rows), interpolation=cv2.INTER_CUBIC)
-            dimg = region2-t_
+            #print(i," : ",rows,cols,rows/cols)
+            
+            t_2 = cv2.resize(t_,(70,70), interpolation=cv2.INTER_CUBIC)
+            
+            
+            dimg = region2-t_2
             n0 = np.sum(dimg==0)
             if n0>ntemp:
                 ntemp = n0
-                number = str(i)               
+                number = str(i)          
+               
             
         code += number
     return code
