@@ -31,10 +31,11 @@ def getCode(imgpath,name):
     xt,yt,wt,ht = codeset["tloc"]    
     x,y,w,h = codeset["loc"]
     size = codeset["resize"]
+    blursize = codeset["blursize"]
 
     image = cv2.imread(imgpath,0)
     part = image[y:y+h,x:x+w]    
-    part =  get0_255img(part)
+    part =  get0_255img(part,blursize)
     parts = split_row(part) 
     parts2 = []
     for p in parts:
@@ -52,7 +53,7 @@ def getCode(imgpath,name):
     
     template = cv2.imread(tfile,0)   
     template = template[yt:yt+ht,xt:xt+wt]
-    template = get0_255img(template)
+    template = get0_255img(template,blursize)
     templates = split_row(template)
     templates2 = []
     for p in templates:
@@ -89,8 +90,8 @@ def show(img):
     cv2.imshow("test",img)
     cv2.waitKey(0)
 
-def get0_255img(old):
-    img = cv2.blur(old,(5,5))
+def get0_255img(old,size):
+    img = cv2.blur(old,(size,size))
     return cv2.threshold(img, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
 
 def getjustimg(old):
