@@ -23,89 +23,41 @@ def getBarcode(imgpath,name):
         return barcodeData,barcodeType
     return [""]
 
-def getCode1(imgpath,name):      
+def getCode(imgpath,name):      
     setting = cfg.get("t_"+name)
     codeset = setting["code"] 
     t = cv2.imread(codeset["tfile"],0)    
-    tloc = codeset["tloc"]
-    fx = codeset["fx"]
-    fy = codeset["fy"]
+    tloc = codeset["tloc"]    
     x,y,w,h = codeset["loc"]
-    threshold = codeset["threshold"]
-    sort = codeset["sort"]
-    image = cv2.imread(imgpath,0)
-    part = image[y:y+h,x:x+w]
-    pts = []    
-    for i in range(10):  
-        try:
-            
-            t_ = eval("t["+tloc[i]+"]") 
-            
-            t_ = cv2.resize(t_, None, fx=fx[i], fy=fy[i], interpolation=cv2.INTER_CUBIC)
-            
-        except:
-            return "模板出错，请检查配置文件:"+ str(i)       
-                
-        res = cv2.matchTemplate(part, t_ , cv2.TM_CCOEFF_NORMED)        
-        loc = np.where(res >= threshold[i]) 
-        for p in zip(*loc[::-1]):            
-            closed = False
-            for p2 in pts:
-                if abs(p[0]-p2["p"][0])+abs(p[1]-p2["p"][1])<20:
-                    closed = True
-                    break
-            if not closed:                
-                pts.append({"p":p,"i":i})
-    
-    if sort=="x":
-        key = lambda o:o['p'][0]
-    else:
-        key = lambda o:o['p'][1]
-    pts.sort(key=key)
-    
-    code = ""
-    for p in pts:
-        code += str(p["i"])
-    return code
-
-def getCode2(imgpath,name):      
-    setting = cfg.get("t_"+name)
-    codeset = setting["code"] 
-    t = cv2.imread(codeset["tfile"],0)    
-    tloc = codeset["tloc"]
-    fx = codeset["fx"]
-    fy = codeset["fy"]
-    x,y,w,h = codeset["loc"]
-    threshold = codeset["threshold"]
+    size = codeset["resize"]
     image = cv2.imread(imgpath,0)
     part = image[y:y+h,x:x+w]    
     part =  get0_255img(part)
-    parts = split(part)    
-    parts = [getjustimg(x) for x in parts]
-    
+    parts = split_row(part) 
+    parts = [getjustimg(split_col_getmaximg(x)) for x in parts]
     code = ""
     templateDic = {}    
     for region in parts:  
         number = ""
         ntemp = 0
         region2 = region.copy()
-        region2 = cv2.resize(region2, (70, 70), interpolation=cv2.INTER_CUBIC)
+        region2 = cv2.resize(region2, (size, size), interpolation=cv2.INTER_CUBIC)
         for i in range(10):
             key = "t"+str(i)
             if not( key in templateDic):
                 try:            
                     t_ = eval("t["+tloc[i]+"]")    
-                    t_ = get0_255img(t_)     
+                    t_ = get0_255img(t_)  
+                    t_ = split_row_getmaximg(t_)
+                    t_ = split_col_getmaximg(t_)
                     t_ = getjustimg(t_)  
                     templateDic[key] = t_
                 except:
                     return "模板出错，请检查配置文件:"+ str(i) 
             t_ = templateDic[key]  
-            rows,cols = t_.shape[:2]
-            #print(i," : ",rows,cols,rows/cols)
+            rows,cols = t_.shape[:2]            
             
-            t_2 = cv2.resize(t_,(70,70), interpolation=cv2.INTER_CUBIC)
-            
+            t_2 = cv2.resize(t_,(size,size), interpolation=cv2.INTER_CUBIC)           
             
             dimg = region2-t_2
             n0 = np.sum(dimg==0)
@@ -163,24 +115,48 @@ def getjustimg(old):
             continue 
     return old[r1:r2,c1:c2]
 
-def split(img):
+def split_row(old):
+    img = old.copy()
     rows,cols = img.shape[:2]
     arr = img.tolist()
     ret = []
-    lasttr = 0
-    lasttr2 = 0
+    lastrow = 0
+    lastrow2 = 0
     for r in range(1,rows,1):
         try:
-            arr[lasttr2].index(0)
+            arr[lastrow2].index(0)
             has0 = True
         except ValueError:
             has0 = False
-        has255 = arr[r].count(255)==cols
-        if has0 and has255:
-            ret.append(img[lasttr:r])
-            lasttr = r
-        lasttr2 +=1
+        all255 = arr[r].count(255)==cols
+        if has0 and (all255 or r==rows-1):
+            img_ = img[lastrow:r]            
+            ret.append(img[lastrow:r])
+            lastrow = r
+        lastrow2 +=1
     return ret
+
+def split_row_getmaximg(old):    
+    ret = split_row(old)
+    n0 = 0
+    img2 = None
+    for img in ret:            
+        n = np.sum(img==0)   
+        if n>n0:
+            img2 = img        
+            n0 = n 
+    return img2
+
+def split_col_getmaximg(old):    
+    ret = split_row(old.transpose())
+    n0 = 0
+    img2 = None
+    for img in ret:            
+        n = np.sum(img==0)   
+        if n>n0:
+            img2 = img        
+            n0 = n 
+    return img2.transpose()
 
 if __name__== '__main__':
     functype = sys.argv[1]#"code"#
@@ -189,5 +165,5 @@ if __name__== '__main__':
     if functype == "barcode":
         print(getBarcode(imgpath,name)[0])
     else:     
-        code = getCode2(imgpath,name)
+        code = getCode(imgpath,name)
         print(code)

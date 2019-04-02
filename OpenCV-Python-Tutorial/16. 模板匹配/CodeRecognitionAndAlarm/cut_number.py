@@ -70,7 +70,7 @@ def get_number_region(img):
 
 
 if __name__ == '__main__':
-    img = cv2.imread(r"E:\wqs\svn\pythonproject\ProductionLineVideoRecognition\CodeRecognitionAndAlarm\qie.png", 0)
+    img = cv2.imread(r"qie.png", 0)
     x, y, w, h = (0, 0, 98, 525)
     img = img[y:y + h, x:x + w]
     print (len(get_number_region(img)))
