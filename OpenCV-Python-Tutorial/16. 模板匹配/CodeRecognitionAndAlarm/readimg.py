@@ -26,45 +26,39 @@ def getBarcode(imgpath,name):
 def getCode(imgpath,name):      
     setting = cfg.get("t_"+name)
     codeset = setting["code"] 
-    t = cv2.imread(codeset["tfile"],0)    
-    tloc = codeset["tloc"]    
+    tfile = codeset["tfile"]
+    xt,yt,wt,ht = codeset["tloc"]    
     x,y,w,h = codeset["loc"]
     size = codeset["resize"]
+
     image = cv2.imread(imgpath,0)
     part = image[y:y+h,x:x+w]    
     part =  get0_255img(part)
     parts = split_row(part) 
-    parts = [getjustimg(split_col_getmaximg(x)) for x in parts]
+    parts = [getjustimg(split_col_getmaximg(split_row_getmaximg(x))) for x in parts]
+    
+    template = cv2.imread(tfile,0)   
+    template = template[yt:yt+ht,xt:xt+wt]
+    template = get0_255img(template)
+    templates = split_row(template)
+    templates = [getjustimg(split_col_getmaximg(split_row_getmaximg(x))) for x in templates]
+
+    if len(templates) != 10:
+        return "模板数量不对"
     code = ""
-    templateDic = {}    
-    for region in parts:  
+
+    for p in parts:  
         number = ""
         ntemp = 0
-        region2 = region.copy()
-        region2 = cv2.resize(region2, (size, size), interpolation=cv2.INTER_CUBIC)
+        p2 = p.copy()
+        p2 = cv2.resize(p2, (size, size), interpolation=cv2.INTER_CUBIC)
         for i in range(10):
-            key = "t"+str(i)
-            if not( key in templateDic):
-                try:            
-                    t_ = eval("t["+tloc[i]+"]")    
-                    t_ = get0_255img(t_)  
-                    t_ = split_row_getmaximg(t_)
-                    t_ = split_col_getmaximg(t_)
-                    t_ = getjustimg(t_)  
-                    templateDic[key] = t_
-                except:
-                    return "模板出错，请检查配置文件:"+ str(i) 
-            t_ = templateDic[key]  
-            rows,cols = t_.shape[:2]            
-            
-            t_2 = cv2.resize(t_,(size,size), interpolation=cv2.INTER_CUBIC)           
-            
-            dimg = region2-t_2
+            t = cv2.resize(templates[i],(size,size), interpolation=cv2.INTER_CUBIC) 
+            dimg = p2 - t
             n0 = np.sum(dimg==0)
             if n0>ntemp:
                 ntemp = n0
-                number = str(i)          
-               
+                number = str(i) 
             
         code += number
     return code
