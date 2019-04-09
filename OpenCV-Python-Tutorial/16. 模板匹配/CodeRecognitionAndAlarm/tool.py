@@ -180,7 +180,7 @@ class template(object):
                 v = self.tv[i]
         return v
 
-    def show(self,cols,addv=False):
+    def show(self,cols,showv=False):
         maxr = 0
         maxc = 0
         for x in self.imglist:
@@ -203,6 +203,12 @@ class template(object):
                 shape = img2.shape[:2]
                 x,y,w,h = j*(maxc+dc),i*(maxr+dr),shape[1],shape[0]                
                 img[y:y+h,x:x+w] = img2
+                if showv:
+                    v = self.tv[z]
+                    left = x
+                    bottom=y+maxr+dr-3
+                    cv2.putText(img, text=v, org=(left, bottom), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0, 0, 0), thickness=1,bottomLeftOrigin=False)
+
         cv2.imshow("show split img",img)
         cv2.waitKey()
         

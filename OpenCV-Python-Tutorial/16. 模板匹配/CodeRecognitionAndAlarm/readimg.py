@@ -1,4 +1,4 @@
-﻿from tool import *
+from tool import *
 import datetime
 import json
 import numpy as np
@@ -35,14 +35,14 @@ def getCode(imgpath,name):
 
     img1 = cv2.imread(tfile,0)
     temp1 = template(img1,tloc,tv,blursize)
-    temp1.split(1)
+    temp1.split(20)
     temp1.check()
-    #temp1.show(3,True)
+    temp1.show(3,True)
 
     img2 = cv2.imread(imgpath,0)    
     temp2 = template(img2,loc,[],blursize)
     temp2.split(20)
-    temp2.show(6,False)
+    #temp2.show(14,False)
     code = ""    
     for p in temp2.imglist:  
         code += temp1.getv(p,resize)
