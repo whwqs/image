@@ -1,2 +1,2 @@
-python readimg.py code 20190402_112903.bmp »Æº×Â¥
+python readimg.py code 0_9_3.png »Æº×Â¥
 pause
