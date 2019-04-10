@@ -1,0 +1,2 @@
+python Брвы.py
+pause
