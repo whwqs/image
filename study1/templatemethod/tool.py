@@ -170,10 +170,11 @@ class template(object):
         v = None
         ntemp = 0
         p2 = img.copy()        
-        p2 = cv2.resize(p2, (resize, resize), interpolation=cv2.INTER_CUBIC)
+        p2 = cv2.resize(p2, (resize, resize), interpolation=cv2.INTER_NEAREST)
         for i in range(len(self.imglist)):
-            t = cv2.resize(self.imglist[i],(resize,resize), interpolation=cv2.INTER_CUBIC) 
+            t = cv2.resize(self.imglist[i],(resize,resize), interpolation=cv2.INTER_NEAREST) 
             dimg = p2 - t
+            show(dimg)
             n0 = np.sum(dimg==0)
             if n0>ntemp:
                 ntemp = n0
