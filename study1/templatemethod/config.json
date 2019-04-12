@@ -21,14 +21,14 @@
 		"t_黑白模板": {
 				"name": "黑白模板",
 				"code": {
-						"tfile": "0_9.jpg",
-						"tloc": [ 40, 100, 2427, 3393 ],
+						"tfile": "0_9_bw1.png",
+						"tloc": [ 0, 0, 654, 914 ],
 						"tv": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ],
 						"loc": [ 42,36,1185,636 ],
 						"blursize": 3,
 						"resize": 300,
 						"interpolation": "cv2.INTER_NEAREST",
-						"tminpx": 100,
+						"tminpx": 20,
 						"minpx": 100
 				}
 		}

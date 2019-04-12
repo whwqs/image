@@ -45,7 +45,7 @@ def getCode(imgpath,cfgname):
     temp1 = template(img1,tloc,tv,blursize)
     temp1.split(tminpx)
     temp1.check()
-    #temp1.show(3,True)
+    #temp1.show(10,True,"templates")
 
     img2 = cv2.imread(imgpath,0)    
     temp2 = template(img2,loc,[],blursize)
