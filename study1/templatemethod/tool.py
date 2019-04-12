@@ -166,15 +166,15 @@ class template(object):
         if nv!=nimg:
             raise Exception("图像切分数量不等于值的数量，图像数量："+str(nimg)+",值数量："+str(nv))
 
-    def getv(self,img,resize):
+    def getv(self,img,resize,interpolation):
         v = None
         ntemp = 0
         p2 = img.copy()        
-        p2 = cv2.resize(p2, (resize, resize), interpolation=cv2.INTER_NEAREST)
+        p2 = cv2.resize(p2, (resize, resize), interpolation=interpolation)
         for i in range(len(self.imglist)):
-            t = cv2.resize(self.imglist[i],(resize,resize), interpolation=cv2.INTER_NEAREST) 
+            t = cv2.resize(self.imglist[i],(resize,resize), interpolation=interpolation) 
             dimg = p2 - t
-            show(dimg)
+            #show(dimg)
             n0 = np.sum(dimg==0)
             if n0>ntemp:
                 ntemp = n0

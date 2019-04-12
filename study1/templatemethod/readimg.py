@@ -10,12 +10,17 @@ from pyzbar import pyzbar
 
 cfg = config("config.json")
 
-def getBarcode(imgpath,name):  
-    setting = cfg.get("t_"+name)
+def getBarcode(imgpath,cfgname):  
+    setting = cfg.get("t_"+cfgname)
     barcodeset = setting["barcode"]
     x,y,w,h = barcodeset["loc"]
+    resize = barcodeset["resize"]
     image = cv2.imread(imgpath,0)
     part = image[y:y+h,x:x+w]
+    r,c = part.shape[:2]
+    if resize > 1:
+        part = cv2.resize(part,(resize*c,resize*r), interpolation=cv2.INTER_CUBIC)
+    #show(part)
     barcodes = pyzbar.decode(part)        
     for barcode in barcodes:
         barcodeData = barcode.data.decode("utf-8")
@@ -23,14 +28,15 @@ def getBarcode(imgpath,name):
         return barcodeData,barcodeType
     return [""]
 
-def getCode(imgpath,name):      
-    setting = cfg.get("t_"+name)
+def getCode(imgpath,cfgname):      
+    setting = cfg.get("t_"+cfgname)
     codeset = setting["code"] 
     tfile = codeset["tfile"]
     tv = codeset["tv"]
     tloc = codeset["tloc"]    
     loc = codeset["loc"]
     resize = codeset["resize"]
+    interpolation = eval(codeset["interpolation"])
     blursize = codeset["blursize"]
     tminpx = codeset["tminpx"]
     minpx = codeset["minpx"]
@@ -44,10 +50,10 @@ def getCode(imgpath,name):
     img2 = cv2.imread(imgpath,0)    
     temp2 = template(img2,loc,[],blursize)
     temp2.split(minpx)
-    #temp2.show(14,False)
+    #temp2.show(8,False)
     code = ""    
     for p in temp2.imglist:  
-        code += temp1.getv(p,resize)
+        code += temp1.getv(p,resize,interpolation)
     return code
 
 if __name__== '__main__':
@@ -56,6 +62,6 @@ if __name__== '__main__':
     name = sys.argv[3]# "黄鹤楼"#   
     if functype == "barcode":
         print(getBarcode(imgpath,name)[0])
-    else:     
+    elif functype=="code":     
         code = getCode(imgpath,name)
         print(code)
