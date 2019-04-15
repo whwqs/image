@@ -159,26 +159,49 @@ class template(object):
         img = img[y:y+h,x:x+w]        
         img = get0_255img(img,self.blursize)
         self.imglist = split(img,mincount_0)
+        self.imgwhratelist = [x.shape[1]/x.shape[0] for x in self.imglist]        
         
     def check(self):
         nimg = len(self.imglist)
-        nv = len(self.tv)
+        nv = len(self.tv)        
         if nv!=nimg:
             raise Exception("图像切分数量不等于值的数量，图像数量："+str(nimg)+",值数量："+str(nv))
+        self.v_whrate_dic = {}
+        for i in range(nv):
+            v = self.tv[i]
+            rate = self.imgwhratelist[i]
+            self.v_whrate_dic[v] = rate
 
     def getv(self,img,resize,interpolation):
         v = None
+        idx = -1
         ntemp = 0
         p2 = img.copy()        
         p2 = cv2.resize(p2, (resize, resize), interpolation=interpolation)
         for i in range(len(self.imglist)):
             t = cv2.resize(self.imglist[i],(resize,resize), interpolation=interpolation) 
-            dimg = p2 - t
-            #show(dimg)
+            dimg = t-p2    
             n0 = np.sum(dimg==0)
+            
+            #dimg[dimg==1] = 255            
+            #show(dimg)
+
             if n0>ntemp:
                 ntemp = n0
                 v = self.tv[i]
+                idx = i
+        return v
+
+    def modifybyrate(self,v,realrate):        
+        if v=="7":
+            rate7 = self.v_whrate_dic["7"]
+            rate1 = self.v_whrate_dic["1"]
+            d1 = math.fabs(rate7-realrate)
+            d2 = math.fabs(rate1-realrate)
+            if d1<d2:
+                return "7"
+            else:
+                return "1"
         return v
 
     def show(self,cols,showv=False,title="test"):

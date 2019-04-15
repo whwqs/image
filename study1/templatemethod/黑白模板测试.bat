@@ -1,2 +1,2 @@
-python readimg.py code 09test2.png ºÚ°×Ä£°å
+python readimg.py code2 09test2.png ºÚ°×Ä£°å
 pause

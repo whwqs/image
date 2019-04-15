@@ -19,7 +19,7 @@ def getBarcode(imgpath,cfgname):
     part = image[y:y+h,x:x+w]
     r,c = part.shape[:2]
     if resize > 1:
-        part = cv2.resize(part,(resize*c,resize*r), interpolation=cv2.INTER_CUBIC)
+        part = cv2.resize(part,(resize*c,resize*r), interpolation=cv2.INTER_LANCZOS4)
     #show(part)
     barcodes = pyzbar.decode(part)        
     for barcode in barcodes:
@@ -52,8 +52,42 @@ def getCode(imgpath,cfgname):
     temp2.split(minpx)
     #temp2.show(8,False)
     code = ""    
-    for p in temp2.imglist:  
-        code += temp1.getv(p,resize,interpolation)
+    for idx in range(len(temp2.imglist)):
+        img3 = temp2.imglist[idx]
+        realrate = temp2.imgwhratelist[idx] 
+        v = temp1.getv(img3,resize,interpolation)
+        v = temp1.modifybyrate(v,realrate) 
+        code += v
+    return code
+
+def getCode2(imgpath,cfgname):      
+    setting = cfg.get("t_"+cfgname)
+    codeset = setting["code"] 
+    tfile = codeset["tfile"]
+    tv = codeset["tv"]
+    tloc = codeset["tloc"]    
+    loc = codeset["loc"]
+    resize = codeset["resize"]
+    interpolation = eval(codeset["interpolation"])
+    blursize = codeset["blursize"]
+    tminpx = codeset["tminpx"]
+    minpx = codeset["minpx"]
+
+    img1 = cv2.imread(tfile,0)
+    temp1 = template(img1,tloc,tv,blursize)
+    temp1.split(tminpx)
+    temp1.check()
+    #temp1.show(10,True,"templates")
+
+    img2 = cv2.imread(imgpath,0)    
+    temp2 = template(img2,loc,[],blursize)
+    temp2.split(minpx)
+    #temp2.show(8,False)
+    code = ""    
+    for idx in range(len(temp2.imglist)):
+        img3 = temp2.imglist[idx]        
+        v = temp1.getv(img3,resize,interpolation)        
+        code += v
     return code
 
 if __name__== '__main__':
@@ -64,4 +98,7 @@ if __name__== '__main__':
         print(getBarcode(imgpath,name)[0])
     elif functype=="code":     
         code = getCode(imgpath,name)
+        print(code)
+    elif functype=="code2":     
+        code = getCode2(imgpath,name)
         print(code)
