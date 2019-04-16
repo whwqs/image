@@ -3,11 +3,21 @@
 
 import cv2
 import numpy as np
+import sys
+import os
+dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(dir)
+
+def show(img,title="test"):
+    cv2.imshow(title,img)
+    cv2.waitKey(0)
 
 # 载入手写数字图片
 img = cv2.imread('handwriting2.jpg', 0)
 _, thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-image, contours, hierarchy = cv2.findContours(thresh, 3, 2)
+image,contours, hierarchy = cv2.findContours(thresh, 3, 2)
+ 
+
 
 # 创建出两幅彩色图用于绘制
 img_color1 = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
@@ -16,6 +26,8 @@ img_color2 = np.copy(img_color1)
 # 以数字3的轮廓为例
 cnt = contours[0]
 cv2.drawContours(img_color1, [cnt], 0, (0, 0, 255), 2)
+
+
 
 # 1.轮廓面积
 area = cv2.contourArea(cnt)  # 4386.5
@@ -33,6 +45,8 @@ print(M)
 print(M['m00'])  # 同前面的面积：4386.5
 cx, cy = M['m10'] / M['m00'], M['m01'] / M['m00']  # 质心
 print(cx, cy)
+
+
 
 # 4.图像外接矩形和最小外接矩形
 x, y, w, h = cv2.boundingRect(cnt)  # 外接矩形
@@ -65,10 +79,13 @@ cv2.waitKey(0)
 # 7.形状匹配
 img = cv2.imread('shapes.jpg', 0)
 _, thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-image, contours, hierarchy = cv2.findContours(thresh, 3, 2)
+image,contours, hierarchy = cv2.findContours(thresh, 3, 2)
+
 img_color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
 
 cnt_a, cnt_b, cnt_c = contours[0], contours[1], contours[2]
 print(cv2.matchShapes(cnt_b, cnt_b, 1, 0.0))  # 0.0
 print(cv2.matchShapes(cnt_b, cnt_c, 1, 0.0))  # 2.17e-05
 print(cv2.matchShapes(cnt_b, cnt_a, 1, 0.0))  # 0.418
+
+show(image)

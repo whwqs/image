@@ -5,10 +5,37 @@ import cv2
 import time
 import sys
 import math
+import random
+import os
+
+def getarclength(img):
+    tmpimg,contours, hierarchy = cv2.findContours(img, 3, 2)  
+    return cv2.arcLength(contours[0], True)
+
+def getcontours(img):
+    tmpimg,contours, hierarchy = cv2.findContours(img, 3, 2)  
+    return contours
+
+def countofcontours(img):
+    tmpimg,contours, hierarchy = cv2.findContours(img, 3, 2)  
+    return len(contours)
+
+def reverseimg(img):
+    tmp = img.copy()
+    r,c = tmp.shape
+    for r1 in range(r):
+        for c1 in range(c):
+            tmp[r1,c1] = 255-tmp[r1,c1]
+    return tmp
+
+def setcurrentdir():
+    dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(dir)
 
 def get0_255img(img,size):
     img2 = cv2.blur(img,(size,size))
-    return cv2.threshold(img2, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
+    _,thresh = cv2.threshold(img2, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)
+    return thresh
 
 def getjustimg(img):
     if img is None:
@@ -101,8 +128,8 @@ def split_col_getmaximg(old):
         return None
     return img2.transpose()
 
-def show(img):
-    cv2.imshow("test",img)
+def show(img,title="test"):
+    cv2.imshow(title,img)
     cv2.waitKey(0)
 
 class tool(object):
@@ -143,7 +170,7 @@ class config(object):
     def getobj(self):
         return self.obj
 
-class template(object):
+class ImageSplit(object):
     def __init__(self, img, tloc,tv,blursize=3):   
         if len(img.shape)<3:
             self.img = img
@@ -158,51 +185,13 @@ class template(object):
         x,y,w,h = self.tloc
         img = img[y:y+h,x:x+w]        
         img = get0_255img(img,self.blursize)
-        self.imglist = split(img,mincount_0)
-        self.imgwhratelist = [x.shape[1]/x.shape[0] for x in self.imglist]        
+        self.imglist = split(img,mincount_0)#切分后放在这个数组        
         
     def check(self):
         nimg = len(self.imglist)
         nv = len(self.tv)        
         if nv!=nimg:
-            raise Exception("图像切分数量不等于值的数量，图像数量："+str(nimg)+",值数量："+str(nv))
-        self.v_whrate_dic = {}
-        for i in range(nv):
-            v = self.tv[i]
-            rate = self.imgwhratelist[i]
-            self.v_whrate_dic[v] = rate
-
-    def getv(self,img,resize,interpolation):
-        v = None
-        idx = -1
-        ntemp = 0
-        p2 = img.copy()        
-        p2 = cv2.resize(p2, (resize, resize), interpolation=interpolation)
-        for i in range(len(self.imglist)):
-            t = cv2.resize(self.imglist[i],(resize,resize), interpolation=interpolation) 
-            dimg = t-p2    
-            n0 = np.sum(dimg==0)
-            
-            #dimg[dimg==1] = 255            
-            #show(dimg)
-
-            if n0>ntemp:
-                ntemp = n0
-                v = self.tv[i]
-                idx = i
-        return v
-
-    def modifybyrate(self,v,realrate):        
-        if v=="7":
-            rate7 = self.v_whrate_dic["7"]
-            rate1 = self.v_whrate_dic["1"]
-            d1 = math.fabs(rate7-realrate)
-            d2 = math.fabs(rate1-realrate)
-            if d1<d2:
-                return "7"
-            else:
-                return "1"
-        return v
+            raise Exception("图像切分数量不等于值的数量，图像数量："+str(nimg)+",值数量："+str(nv))        
 
     def show(self,cols,showv=False,title="test"):
         maxr = 0
@@ -235,4 +224,85 @@ class template(object):
 
         cv2.imshow(title,img)
         cv2.waitKey()
+
+class ImageRecognizer(object):
+    def __init__(self,img,templatesplitinstance):
+        self.img = img
+        self.template = templatesplitinstance
+
+    def getbytemplate(self,resize,interpolation):
+        v = None
+        idx = -1
+        lastidx = -1
+        sum0 = 0
+        lastsum0 = 0
+        tresizeimg = None
+        lasttresizeimg = None
+
+        p2 = self.img.copy()        
+        p2 = cv2.resize(p2, (resize, resize), interpolation=interpolation)
+        self.resizeimg = p2
+
+        for i in range(len(self.template.imglist)):
+            t = cv2.resize(self.template.imglist[i],(resize,resize), interpolation=interpolation) 
+            dimg = t-p2    
+            n0 = np.sum(dimg==0)
+            
+            #dimg[dimg==1] = 255            
+            #show(dimg)
+
+            if n0>sum0:
+                v = self.template.tv[i]
+                lastsum0 = sum0
+                sum0 = n0                
+                lastidx = idx
+                idx = i
+                lasttresizeimg = tresizeimg
+                tresizeimg = t
+
+        self.v = v
+        self.tidx = idx
+        self.lasttidx = lastidx
+        self.sum0 = sum0
+        self.lastsum0 = lastsum0
+        self.sum0rate = math.fabs(sum0-lastsum0)/(resize*resize)
+        self.tresizeimg = tresizeimg
+        self.lasttresizeimg = lasttresizeimg
+
+    def check0_9(self):
+        #print(self.tidx,self.lasttidx,self.sum0,self.lastsum0,self.sum0rate)
+        if self.sum0rate>0.2:
+            return
+        try:
+            img = reverseimg(self.img)
+            timg = reverseimg(self.template.imglist[self.tidx])
+            lasttimg = reverseimg(self.template.imglist[self.lasttidx])
+            n1 = countofcontours(img)
+            n2 = countofcontours(timg)
+            n3 = countofcontours(lasttimg)
+            if n2!=n3:
+                if n1==n3:
+                    self.v = self.template.tv[self.lasttidx]                    
+                    return  
+        except:
+            return      
+        
+    def get0_9bymatch(self):#误差大，速度慢
+        v = None
+        match = 9999        
+        p = reverseimg(self.img)
+        c1 = getcontours(p)[0]
+        for i in range(len(self.template.imglist)):
+            timg = self.template.imglist[i]
+            timg = reverseimg(timg)
+            c2 = getcontours(timg)[0]
+            m = cv2.matchShapes(c1,c2,1,0.0)
+
+            if match>m:
+                v = self.template.tv[i]
+                match = m
+
+        self.v = v
+        
+
         

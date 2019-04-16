@@ -10,10 +10,10 @@
 						"tfile": "0_9.png",
 						"tloc": [ 242, 234, 117, 823 ],
 						"tv": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ],
-						"loc": [ 375, 556, 65, 381 ],
+						"loc": [ 514, 556, 65, 381 ],
 						"blursize": 3,
 						"resize": 300,
-						"interpolation": "cv2.INTER_LANCZOS4",
+						"interpolation": "cv2.INTER_NEAREST",
 						"tminpx": 100,
 						"minpx": 100
 				}

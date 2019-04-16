@@ -42,22 +42,22 @@ def getCode(imgpath,cfgname):
     minpx = codeset["minpx"]
 
     img1 = cv2.imread(tfile,0)
-    temp1 = template(img1,tloc,tv,blursize)
+    temp1 = ImageSplit(img1,tloc,tv,blursize)
     temp1.split(tminpx)
     temp1.check()
     #temp1.show(10,True,"templates")
 
     img2 = cv2.imread(imgpath,0)    
-    temp2 = template(img2,loc,[],blursize)
+    temp2 = ImageSplit(img2,loc,[],blursize)
     temp2.split(minpx)
     #temp2.show(8,False)
     code = ""    
     for idx in range(len(temp2.imglist)):
         img3 = temp2.imglist[idx]
-        realrate = temp2.imgwhratelist[idx] 
-        v = temp1.getv(img3,resize,interpolation)
-        v = temp1.modifybyrate(v,realrate) 
-        code += v
+        recog = ImageRecognizer(img3,temp1)
+        recog.getbytemplate(resize,interpolation)
+        recog.check0_9()        
+        code += recog.v
     return code
 
 def getCode2(imgpath,cfgname):      
@@ -74,20 +74,21 @@ def getCode2(imgpath,cfgname):
     minpx = codeset["minpx"]
 
     img1 = cv2.imread(tfile,0)
-    temp1 = template(img1,tloc,tv,blursize)
+    temp1 = ImageSplit(img1,tloc,tv,blursize)
     temp1.split(tminpx)
     temp1.check()
     #temp1.show(10,True,"templates")
 
     img2 = cv2.imread(imgpath,0)    
-    temp2 = template(img2,loc,[],blursize)
+    temp2 = ImageSplit(img2,loc,[],blursize)
     temp2.split(minpx)
     #temp2.show(8,False)
     code = ""    
     for idx in range(len(temp2.imglist)):
         img3 = temp2.imglist[idx]        
-        v = temp1.getv(img3,resize,interpolation)        
-        code += v
+        recog = ImageRecognizer(img3,temp1)
+        recog.getbytemplate(resize,interpolation)
+        code += recog.v
     return code
 
 if __name__== '__main__':
