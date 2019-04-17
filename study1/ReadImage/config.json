@@ -1,0 +1,37 @@
+﻿{
+		"version": "1.0",
+		"t_黄鹤楼": {
+				"name": "黄鹤楼",
+				"barcode": {
+						"loc": [ 1261, 596, 131, 196 ],
+						"resize": 2,
+						"contrast": 1.5,
+						"brightness": 50
+				},
+				"code": {
+						"tfile": "0_9.png",
+						"tloc": [ 242, 234, 117, 823 ],
+						"tv": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ],
+						"loc": [ 379,550,127,390 ],
+						"blursize": 3,
+						"resize": 3,
+						"interpolation": "cv2.INTER_NEAREST",
+						"tminpx": 100,
+						"minpx": 100
+				}
+		},
+		"t_黑白模板": {
+				"name": "黑白模板",
+				"code": {
+						"tfile": "0_9.bmp",
+						"tloc": [ 0, 0, 400, 530 ],
+						"tv": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ],
+						"loc": [ 42,36,1185,636 ],
+						"blursize": 3,
+						"resize": 3,
+						"interpolation": "cv2.INTER_NEAREST",
+						"tminpx": 20,
+						"minpx": 100
+				}
+		}
+}

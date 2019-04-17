@@ -3,7 +3,9 @@
 
 import cv2
 import numpy as np
-
+import os
+dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(dir)
 
 # 多边形逼近
 # 1.先找到轮廓
@@ -26,6 +28,7 @@ cv2.waitKey(0)
 # 凸包
 # 1.先找到轮廓
 img = cv2.imread('convex.jpg', 0)
+#img = cv2.imread('0_9_2.bmp', 0)
 _, thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 image, contours, hierarchy = cv2.findContours(thresh, 3, 2)
 cnt = contours[0]
