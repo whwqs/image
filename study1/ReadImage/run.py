@@ -8,12 +8,13 @@ def getBarcode(imgpath,cfgname):
     resize = barcodeset["resize"]
     contrast = barcodeset["contrast"]
     brightness = barcodeset["brightness"]
+    bfix = barcodeset["bfix"]
     image = cv2.imread(imgpath,0)
-    part = image[y:y+h,x:x+w]
-    recog = BarcodeRecognizer(part,resize,contrast,brightness)
+    part = image[y:y+h,x:x+w]    
+    recog = BarcodeRecognizer(part,resize,contrast,brightness,bfix)
     return recog.getBarcode()
 
-def getCode(imgpath,cfgname):      
+def getDigitals(imgpath,cfgname):      
     setting = cfg.get("t_"+cfgname)
     codeset = setting["code"] 
     tfile = codeset["tfile"]
@@ -45,7 +46,7 @@ def getCode(imgpath,cfgname):
         code += recog.v
     return code
 
-def getCode2(imgpath,cfgname):      
+def getCodeByTemplate(imgpath,cfgname):      
     setting = cfg.get("t_"+cfgname)
     codeset = setting["code"] 
     tfile = codeset["tfile"]
@@ -76,6 +77,20 @@ def getCode2(imgpath,cfgname):
         code += recog.v
     return code
 
+def getBinary(imgpath):
+    img2 = cv2.imread(imgpath,0)    
+    h,w = img2.shape    
+    temp2 = ImageSplit(img2,(0,0,w,h),[],3)
+    temp2.split(100)
+    code = ""    
+    for idx in range(temp2.count):
+        img3 = temp2.imglist[idx]
+        recog = ImageRecognizer(img3)
+        recog.readBinary(3,3)
+        code += recog.v
+    return code
+
+
 if __name__== '__main__':
     functype = sys.argv[1]#"code"#
     imgpath = sys.argv[2]#"20190329_150621.bmp"#
@@ -83,8 +98,11 @@ if __name__== '__main__':
     if functype == "barcode":
         print(getBarcode(imgpath,name)[0])
     elif functype=="code":     
-        code = getCode(imgpath,name)
+        code = getDigitals(imgpath,name)
         print(code)
     elif functype=="code2":     
-        code = getCode2(imgpath,name)
+        code = getCodeByTemplate(imgpath,name)
+        print(code)
+    elif functype == "code3":
+        code = getBinary(imgpath)
         print(code)

@@ -5,6 +5,13 @@ from pytesseract import pytesseract
 from pyzbar import pyzbar
 from PIL import Image,ImageEnhance
 
+def contrast_and_brightness(alpha, beta, img):
+    blank = np.full(img.shape,0,img.dtype)
+    #part = np.uint8(np.clip((alpha * part + beta), 0, 255))#改变亮度和对比度  
+    # dst = alpha * img + beta * blank
+    dst = cv2.addWeighted(img, alpha, blank, 1-alpha, beta)    
+    return dst
+
 def smallImage(img):
     tmp = img.copy()
     tmp = cv2.resize(tmp,(100,100), interpolation=cv2.INTER_NEAREST)
@@ -139,20 +146,23 @@ def show(img,title="test"):
     cv2.waitKey(0)
 
 class BarcodeRecognizer(object):
-    def __init__(self, img,resize=1,contrast=1.5,brightness=50):
+    def __init__(self, img,resize=1,contrast=1.5,brightness=50,bfix=False):
         self.img = img
         self.resize = resize
         self.contrast = contrast#对比度1-3 
         self.brightness = brightness#亮度0-100
+        self.bfix = bfix
 
     def getBarcode(self):
         part = self.img.copy()
         resize = self.resize
-        r,c = part.shape[:2]       
-        if resize > 1:
-            part = cv2.resize(part,(resize*c,resize*r), interpolation=cv2.INTER_LANCZOS4) 
-        part = np.uint8(np.clip((self.contrast * part + self.brightness), 0, 255))#增加亮度和对比度 
-        #show(part)
+        r,c = part.shape[:2]
+        if self.bfix:            
+            part = cv2.resize(part,(resize*c,resize*r), interpolation=cv2.INTER_LANCZOS4) #INTER_LANCZOS4  
+            #part[part>thresh]=255
+            #_,part = cv2.threshold(part, thresh, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)
+            part = contrast_and_brightness(self.contrast,self.brightness,part)            
+            #show(part)
         barcodes = pyzbar.decode(part) 
         for barcode in barcodes:
             barcodeData = barcode.data.decode("utf-8")
@@ -188,7 +198,12 @@ class ImageSplit(object):
                 raise Exception("请检查数字模板是否正确,当前配值是："+str(self.tv))   
             idx = self.tv.index("1")
             self.wh_1 = self.whrate[idx]
-            self.wh_other = (np.sum(self.whrate)-self.wh_1)/(self.count-1)            
+            self.wh_other = (np.sum(self.whrate)-self.wh_1)/(self.count-1) 
+            idx = self.tv.index("3")
+            self.wh_3 = self.whrate[idx]
+            self.v_idx_dic = {}
+            for i in range(nv):
+                self.v_idx_dic[self.tv[i]] = i
 
     def show(self,cols,showv=False,title="test"):
         maxr = 0
@@ -223,9 +238,9 @@ class ImageSplit(object):
         cv2.waitKey()
 
 class ImageRecognizer(object):
-    def __init__(self,img,templatesplitinstance=None):
+    def __init__(self,img,imgSplit=None):
         self.img = img
-        self.template = templatesplitinstance
+        self.imageSplit = imgSplit
         self.debug_1 = -1        
 
     def getCodeFromTemplate(self,resize,interpolation):
@@ -237,13 +252,13 @@ class ImageRecognizer(object):
         size = (w*resize,h*resize)
         img0 = cv2.resize(img0, size, interpolation=interpolation)        
         
-        for i in range(self.template.count):
-            t = cv2.resize(self.template.imglist[i],size, interpolation=interpolation) 
+        for i in range(self.imageSplit.count):
+            t = cv2.resize(self.imageSplit.imglist[i],size, interpolation=interpolation) 
             dimg = t-img0    
             n0 = np.sum(dimg==0)
 
             if n0>sum0:                
-                v = self.template.tv[i]                
+                v = self.imageSplit.tv[i]                
                 sum0 = n0  
 
         self.v = v
@@ -266,15 +281,19 @@ class ImageRecognizer(object):
             self.v = "8"
             return
         #1
-        f1 = math.fabs(whrate0-self.template.wh_1)
-        f2 = math.fabs(whrate0-self.template.wh_other)
-        if f1<f2:
-            self.v = "1"
+        f1 = math.fabs(whrate0-self.imageSplit.wh_1)
+        f2 = math.fabs(whrate0-self.imageSplit.wh_other)
+        if f1<f2:#3掉像素时也会扁，所以有可能是3            
+            f2 = math.fabs(whrate0-self.imageSplit.wh_3)
+            if f1<f2:
+                self.v = "1"
+            else:
+                self.v = "3"
             return        
         
-        for i in range(self.template.count):
-            img1 = self.template.imglist[i]
-            count1 = digital_countOfContours_dic[self.template.tv[i]]
+        for i in range(self.imageSplit.count):
+            img1 = self.imageSplit.imglist[i]
+            count1 = digital_countOfContours_dic[self.imageSplit.tv[i]]
             if count0 != count1:
                 continue
 
@@ -288,7 +307,7 @@ class ImageRecognizer(object):
                 print(i,n0)
 
             if n0>sum0:                
-                v = self.template.tv[i]                
+                v = self.imageSplit.tv[i]                
                 sum0 = n0 
 
         self.v = v        
@@ -296,5 +315,20 @@ class ImageRecognizer(object):
         if debug and self.debug_1== debug_1:
             print(self.v,self.lastv,self.sum0rate)        
 
-    def readbinary(self,nx=3,ny=3):
-        pass
+    def readBinary(self,cx=3,cy=3):
+        r,c = self.img.shape
+        img = self.img[1:r-1,1:c-1]#去掉白边
+        r2,c2 = img.shape
+        dx = math.ceil(c2/cx)#小块宽
+        dy = math.ceil(r2/cy)#小块高
+        size = dx*dy
+        binary = ""
+        for i in range(cy):#从上往下
+            for j in range(cx):#从左到右
+                dimg = img[i*dy:(i+1)*dy,j*dx:(j+1)*dx]
+                n0 = np.sum(dimg==0)
+                if n0/size>0.5:
+                    binary += "0"
+                else:
+                    binary += "1"
+        self.v = binary

@@ -3,21 +3,22 @@
 		"t_黄鹤楼": {
 				"name": "黄鹤楼",
 				"barcode": {
-						"loc": [ 1261, 596, 131, 196 ],
+						"loc": [ 1275,388,92,135 ],
+						"bfix": true,
 						"resize": 2,
 						"contrast": 1.5,
-						"brightness": 50
+						"brightness": 100
 				},
 				"code": {
 						"tfile": "0_9.png",
 						"tloc": [ 242, 234, 117, 823 ],
 						"tv": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ],
-						"loc": [ 379,550,127,390 ],
+						"loc": [ 517,342,104,335 ],
 						"blursize": 3,
 						"resize": 3,
 						"interpolation": "cv2.INTER_NEAREST",
 						"tminpx": 100,
-						"minpx": 100
+						"minpx": 30
 				}
 		},
 		"t_黑白模板": {
