@@ -18,15 +18,19 @@ def smallImage(img):
     return tmp
 
 def getArcLength(img):
-    tmpimg,contours, hierarchy = cv2.findContours(img, 3, 2)  
+    contours = getContours(img)
     return cv2.arcLength(contours[0], True)
 
 def getContours(img):
-    tmpimg,contours, hierarchy = cv2.findContours(img, 3, 2)  
+    ret = cv2.findContours(img.copy(),3,2)
+    if len(ret)==2:
+        contours = ret[0]
+    elif len(ret)==3:
+        contours = ret[1]    
     return contours
 
 def countOfContours(img):
-    tmpimg,contours, hierarchy = cv2.findContours(img, 3, 2)  
+    contours = getContours(img) 
     return len(contours)
 
 def reverseImage(img):
@@ -244,7 +248,7 @@ class ImageRecognizer(object):
         self.debug_1 = -1        
 
     def getCodeFromTemplate(self,resize,interpolation):
-        v = None        
+        v = ""        
         sum0 = 0 
         img0 = self.img.copy()        
         h,w = img0.shape
@@ -264,7 +268,7 @@ class ImageRecognizer(object):
         self.v = v
 
     def getOneDigital(self,resize,interpolation):
-        v = None        
+        v = ""        
         sum0 = 0 
         img0 = self.img.copy()        
         h,w = img0.shape

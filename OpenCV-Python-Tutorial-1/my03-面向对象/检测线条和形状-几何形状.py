@@ -13,6 +13,9 @@ https://stackoverflow.com/questions/31974843/detecting-lines-and-shapes-in-openc
 
 import cv2
 import numpy as np
+import os
+dir1 = os.path.dirname(os.path.abspath(__file__))
+os.chdir(dir1)
 
 
 class File(object):

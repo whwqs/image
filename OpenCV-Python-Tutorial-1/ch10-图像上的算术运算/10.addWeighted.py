@@ -9,6 +9,7 @@ import numpy as np
 # 两幅图像的大小 类型必须一致 ，或者第二个 图像可以使一个简单的标量值。
 
 
+
 x = np.uint8([250])
 y = np.uint8([10])
 print(cv2.add(x, y))  # 250+10 = 260 => 255

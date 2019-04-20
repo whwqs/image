@@ -15,6 +15,10 @@ import os
 import errno
 from opencv_windows_management import opencv_windows_management
 
+dir1 = os.path.dirname(os.path.abspath(__file__))
+
+os.chdir(dir1)
+
 cvwm = opencv_windows_management()
 
 path = '../../data/messi5.jpg'

@@ -3,7 +3,9 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
-
+import os
+dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(dir)
 # 为图像扩边，填充
 #如果你想在图像周围创建一个边框，就像相框一样
 # 经常在卷积运算或 0 填充时被用到。

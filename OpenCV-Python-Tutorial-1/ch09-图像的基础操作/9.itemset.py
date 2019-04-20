@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
-
+import os
+dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(dir)
 img = cv2.imread('../data/messi5.jpg')
 
 #
