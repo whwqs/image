@@ -11,6 +11,14 @@
 import cv2
 import numpy as np
 
+import os
+
+def setcurrentdir():
+    dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(dir)
+
+setcurrentdir()
+
 img = cv2.imread('noisy2.png', 0)
 blur = cv2.GaussianBlur(img, (5, 5), 0)
 # find normalized_histogram, and its cumulative distribution function

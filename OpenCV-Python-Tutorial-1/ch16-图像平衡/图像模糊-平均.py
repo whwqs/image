@@ -9,9 +9,20 @@
  是由一个归一化卷积框完成的。他只是用卷积框 盖区域所有像素的平 均值来代替中心元素。可以使用函数 cv2.blur() 和 cv2.boxFilter() 来完  个任务。
 """
 
+import sys
+import os
+
+sys.path.append(os.getcwd())
+from mytool import *
+SetCurrentDir(__file__)
+
+
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+
+
+
 
 img = cv2.imread('../data/opencv_logo.png')
 # blur = cv2.blur(img, (5, 5))
